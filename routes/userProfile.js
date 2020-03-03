@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const user = require("../model/User");
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 //add user
 router.post("/addUser", (req, res) => {
-           
- var dob= new Date(req.body.dob);
+
+    var dob = new Date(req.body.dob);
 
     var password = req.body.password;
 
@@ -22,44 +23,44 @@ router.post("/addUser", (req, res) => {
 
                     data = {
 
-                        "first_name"    : req.body.first_name,
-                        "middle_name"   : req.body.middle_name,
-                        "last_name"     : req.body.last_name,
-                        "dob"           : dob,
-                        "gender"        : req.body.gender,
-                        "hometown"      : req.body.hometown,
-                        "current_city"  : req.body.current_city,
-                        "height"        : req.body.height,
-                        "weight"        : req.body.weight,
-                        "drink"         : req.body.drink,
-                        "smoke"         : req.body.smoke,
-                        "education"     : req.body.education,
-                        "skills"        : req.body.skills,
-                        "job_title"     : req.body.job_title,
-                        "company_name"  : req.body.company_name,
+                        "first_name": req.body.first_name,
+                        "middle_name": req.body.middle_name,
+                        "last_name": req.body.last_name,
+                        "dob": dob,
+                        "gender": req.body.gender,
+                        "hometown": req.body.hometown,
+                        "current_city": req.body.current_city,
+                        "height": req.body.height,
+                        "weight": req.body.weight,
+                        "drink": req.body.drink,
+                        "smoke": req.body.smoke,
+                        "education": req.body.education,
+                        "skills": req.body.skills,
+                        "job_title": req.body.job_title,
+                        "company_name": req.body.company_name,
                         // "user_type"     : req.body.user_type,
-                        "email"         : req.body.email,
-                        "username"      : req.body.username,
-                        "password"      : hashedPassword
+                        "email": req.body.email,
+                        "username": req.body.username,
+                        "password": hashedPassword
 
                     }
 
                     var addUser = new user(data);
                     addUser.save().then(function() {
                         res.send({
-                            message:"Sucessful "
+                            message: "Sucessful "
                         });
-                      
+
                     }).catch(err => {
                         res.status(500).send(
                             err.errors
                         );
-                        })
+                    })
                 }
 
             })
         }
-});
+    });
 });
 
 //login user
@@ -79,16 +80,14 @@ router.post('/login', async function(req, res) {
             const users = await user.checkCrediantialsDb(req.body.username, req.body.password);
 
             if (users) {
-               const token = await users.generateAuthToken();
-                var id = users._id;
-                // var username = users.username;
+                //create and assign token for users
+                const token = jwt.sign({ _id: users._id, username: users.username }, "Bitnare", { expiresIn: "1hr" });
+                return res.status(200).json({
+                    message: "Token created successfully",
+                    token: token,
 
-                res.send({
-                    id, 
-                    // username,
-                    token,
-                    message: "Login sucess"
-                });
+                })
+
 
             } else {
                 res.json({
@@ -104,13 +103,13 @@ router.post('/login', async function(req, res) {
 //get user all
 router.get('/getUsers', function(req, res) {
     user.find()
-    .select("-__v")
-    .select("-password")
-    .then(function(users) {
-        res.send(users);
-    }).catch(function(e) {
-        res.send(e);
-    });
+        .select("-__v")
+        .select("-password")
+        .then(function(users) {
+            res.send(users);
+        }).catch(function(e) {
+            res.send(e);
+        });
 });
 
 //get user by id
@@ -119,19 +118,20 @@ router.get("/fetchUser/:id", function(req, res) {
     console.log(UserId);
 
     user.find({
-        _id: UserId
-    })
-    .select("-__v")
-    .select("-password")
-    .then(function (getuser) {
-        if(getuser){
-     var dob =getuser[0].dob;
-     var current = new Date();
-             var dob = new Date(dob);
-     res.send(getuser); }
-    }).catch(function (e) {
-        res.send(e);
-    });
+            _id: UserId
+        })
+        .select("-__v")
+        .select("-password")
+        .then(function(getuser) {
+            if (getuser) {
+                var dob = getuser[0].dob;
+                var current = new Date();
+                var dob = new Date(dob);
+                res.send(getuser);
+            }
+        }).catch(function(e) {
+            res.send(e);
+        });
 });
 
 //update user by id
@@ -159,22 +159,22 @@ router.delete('/deleteUser/:id', function(req, res) {
 });
 
 //search user by skills and interests
-router.post('/searchUser', function (req,res){
+router.post('/searchUser', function(req, res) {
     // var skills = req.body.skills;
     var job_title = req.body.job_title;
-    
-    user.find({
-        // 'skills': new RegExp(skills, 'i'),   
-        'job_title': new RegExp(job_title, 'i')
 
-    }).select("-__v")
-      .select("-password")
-      .select("-tokens")
-      .then (function(listing){
-        res.send(listing);
-    }).catch(function(e){
-        res.send(e);
-    })
+    user.find({
+            // 'skills': new RegExp(skills, 'i'),   
+            'job_title': new RegExp(job_title, 'i')
+
+        }).select("-__v")
+        .select("-password")
+        .select("-tokens")
+        .then(function(listing) {
+            res.send(listing);
+        }).catch(function(e) {
+            res.send(e);
+        })
 });
 
 // //search user by age and location

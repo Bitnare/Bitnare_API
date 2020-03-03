@@ -9,15 +9,19 @@ const multer = require('multer');
 const bodyparser = require('body-parser');
 const userProfile = require("./routes/userProfile");
 const adminLogin = require("./routes/adminProfile");
+const userPost = require("./routes/userPosts.js");
+const auth = require('./middleware/auth');
 
 
 
 app.use(morgan("dev"));
-app.use(bodyparser.urlencoded({extended:false}));
+app.use(bodyparser.urlencoded({ extended: false }));
 app.use(bodyparser.json());
 app.use(cors());
 
+
 app.use("/user", userProfile);
+app.use("/post", userPost);
 
 
 //for handliing cors errors
@@ -52,5 +56,3 @@ app.use((error, req, res, next) => {
 
 const port = process.env.PORT || 8000;
 app.listen(port);
-
-

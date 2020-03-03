@@ -3,11 +3,11 @@ const router = express.Router();
 const postModel = require('../model/BitnarePosts.js');
 const auth = require('../middleware/verifytoken.js');
 
-router.post('/add', auth, (req, res) => {
+router.post('/add', auth, async(req, res) => {
+    //const id = req.user._id;
 
-    res.json({
-        message: "Aladin motherfuckers"
-    })
+
+
 
 
 });

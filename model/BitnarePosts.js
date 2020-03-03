@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 
 const postSchema = new Schema({
     postdescription: {
-        type: String,
-        required: true
+        type: String
+
 
     },
     postdate: {
@@ -13,6 +13,11 @@ const postSchema = new Schema({
         default: Date.now
 
     },
+    postimage: {
+        type: String
+
+    },
+
     userid: {
         type: Schema.Types.ObjectId,
         ref: 'User'

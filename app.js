@@ -10,7 +10,7 @@ const bodyparser = require('body-parser');
 const userProfile = require("./routes/userProfile");
 const adminLogin = require("./routes/adminProfile");
 const userPost = require("./routes/userPosts.js");
-const auth = require('./middleware/auth');
+
 
 
 

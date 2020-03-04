@@ -87,8 +87,6 @@ router.post('/login', async function(req, res) {
                     token: token,
 
                 })
-
-
             } else {
                 res.json({
                     message: "User not found"

@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const postModel = require('../model/BitnarePosts.js');
+const User = require('../model/User')
 const auth = require('../middleware/verifytoken.js');
-//for stroing image destination and filename
+//for storing image destination and filename
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, './uploads/');
@@ -54,7 +55,7 @@ router.post('/add', auth, upload.array('postimage', 10), async(req, res) => {
 //route to fetch all posts  
 router.get('/all', async(req, res, next) => {
     try {
-        const posts = await postModel.find().select('_id postdescription postdate postimage userid poststatus')
+        const posts = await postModel.find().populate('userid', '-password').select('_id postdescription postdate postimage userid poststatus')
         res.status(200).json({
             posts: posts
         })
@@ -64,6 +65,80 @@ router.get('/all', async(req, res, next) => {
         })
     }
 });
+
+//route to fetch particular user posts
+router.get('/myposts', auth, async(req, res, next) => {
+    const id = req.user._id;
+    try {
+        const userposts = await postModel.find({ userid: id }).populate('userid', '-password');
+        res.status(200).json({
+            myposts: userposts
+        })
+    } catch (error) {
+        res.status(400).json({
+
+            error: error
+        })
+    }
+
+
+
+});
+
+//route to fetch particular any posts with id 
+
+router.get('/:postid', async(req, res, next) => {
+    const postid = req.params.postid;
+    try {
+        const fetchPosts = await postModel.findById({ _id: postid }).populate('userid', '-password');
+        res.status(200).json({
+            post: fetchPosts
+
+        })
+    } catch (error) {
+        res.status(500).json({
+            error: error
+        })
+    }
+})
+
+
+
+
+//route to update post 
+router.patch('/update/:postid', auth, upload.array('postimage', 10), async(req, res, next) => {
+    const userid = req.user._id;
+    const postid = req.params.postid;
+    try {
+        const updatePost = await postModel.updateOne({ _id: postid }, {
+            $set: {
+                postdescription: req.body.postdescription,
+                postimage: req.files.map(file => {
+                    const imgPath = file.path;
+                    return imgPath;
+
+                }),
+                userid: userid,
+            }
+        });
+
+        res.status(200).json({
+            updatepost: updatePost
+
+        })
+
+
+
+    } catch (error) {
+        res.status(500).json({
+            error: error
+        })
+    }
+
+})
+
+
+
 
 //route to delete particular user posts
 router.delete('/delete/:postid', auth, async(req, res, next) => {
@@ -87,11 +162,6 @@ router.delete('/delete/:postid', auth, async(req, res, next) => {
 
 
 
-
-router.get('/me', auth, async(req, res) => {
-    // View logged in user profile
-    res.send(req.user)
-})
 
 
 

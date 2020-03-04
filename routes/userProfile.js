@@ -3,7 +3,30 @@ const router = express.Router();
 const user = require("../model/User");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
 const saltRounds = 10;
+
+//for storing image destination and filename
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './uploadProfile/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + file.originalname);
+    }
+});
+
+//filefilter for only selected type of image is inserted to database
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpeg' ||
+        file.mimetype === 'image/jpg') {
+        cb(null, true)
+    } else {
+        cb(null, false)
+    }
+};
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 //add user
 router.post("/addUser", (req, res) => {

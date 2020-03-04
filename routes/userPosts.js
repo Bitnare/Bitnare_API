@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const postModel = require('../model/BitnarePosts.js');
-const User = require('../model/User')
 const auth = require('../middleware/verifytoken.js');
 //for storing image destination and filename
 const storage = multer.diskStorage({
@@ -29,22 +28,50 @@ const upload = multer({ storage: storage, fileFilter: fileFilter });
 //route to create posts 
 router.post('/add', auth, upload.array('postimage', 10), async(req, res) => {
     const userid = req.user._id;
-    const postData = new postModel({
-        postdescription: req.body.postdescription,
-        postimage: req.files.map(file => {
-            const imgPath = file.path;
-            return imgPath;
-
-        }),
-        userid: userid,
-
-    });
+    const poststatus = req.body.poststatus;
     try {
-        const savePost = await postData.save();
-        res.status(200).json({
-            message: "Post added sucessfully",
-            post: savePost
-        })
+        if (poststatus === 'private') {
+            const postData = new postModel({
+                postdescription: req.body.postdescription,
+                postimage: req.files.map(file => {
+                    const imgPath = file.path;
+                    return imgPath;
+
+                }),
+                userid: userid,
+                poststatus: true
+
+
+            });
+
+            const savePost = await postData.save();
+            res.status(200).json({
+                message: "Post added sucessfully",
+                post: savePost
+            })
+
+
+        } else {
+            const postData = new postModel({
+                postdescription: req.body.postdescription,
+                postimage: req.files.map(file => {
+                    const imgPath = file.path;
+                    return imgPath;
+
+                }),
+                userid: userid,
+                poststatus: false
+
+
+            });
+            const savePost = await postData.save();
+            res.status(200).json({
+                message: "Post added sucessfully",
+                post: savePost
+            })
+        }
+
+
     } catch (error) {
         res.status(500).json({
             error: error
@@ -109,26 +136,44 @@ router.get('/:postid', async(req, res, next) => {
 router.patch('/update/:postid', auth, upload.array('postimage', 10), async(req, res, next) => {
     const userid = req.user._id;
     const postid = req.params.postid;
+    const poststatus = req.body.poststatus;
     try {
-        const updatePost = await postModel.updateOne({ _id: postid }, {
-            $set: {
-                postdescription: req.body.postdescription,
-                postimage: req.files.map(file => {
-                    const imgPath = file.path;
-                    return imgPath;
+        if (poststatus === 'private') {
+            const updatePost = await postModel.updateOne({ _id: postid }, {
+                $set: {
+                    postdescription: req.body.postdescription,
+                    postimage: req.files.map(file => {
+                        const imgPath = file.path;
+                        return imgPath;
 
-                }),
-                userid: userid,
-            }
-        });
+                    }),
+                    userid: userid,
+                    poststatus: true
+                }
+            });
 
-        res.status(200).json({
-            updatepost: updatePost
+            res.status(200).json({
+                updatepost: updatePost
 
-        })
+            })
+        } else {
+            const updatePost = await postModel.updateOne({ _id: postid }, {
+                $set: {
+                    postdescription: req.body.postdescription,
+                    postimage: req.files.map(file => {
+                        const imgPath = file.path;
+                        return imgPath;
 
+                    }),
+                    userid: userid,
+                    poststatus: false
+                }
+            });
 
-
+            res.status(200).json({
+                updatepost: updatePost
+            })
+        }
     } catch (error) {
         res.status(500).json({
             error: error
@@ -156,27 +201,6 @@ router.delete('/delete/:postid', auth, async(req, res, next) => {
         })
     }
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

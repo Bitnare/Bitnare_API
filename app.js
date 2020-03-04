@@ -8,6 +8,7 @@ const bodyparser = require('body-parser');
 const userProfile = require("./routes/userProfile");
 const adminLogin = require("./routes/adminProfile");
 const userPost = require("./routes/userPosts.js");
+const favouritePost = require("./routes/favouritePosts");
 
 
 
@@ -20,7 +21,7 @@ app.use(cors());
 
 app.use("/user", userProfile);
 app.use("/post", userPost);
-
+app.use("/favourites", favouritePost);
 
 
 //for handliing cors errors

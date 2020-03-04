@@ -1,8 +1,6 @@
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
-
-
 const mongoose = require('./database/db');
 const cors = require("cors");
 const multer = require('multer');
@@ -10,11 +8,12 @@ const bodyparser = require('body-parser');
 const userProfile = require("./routes/userProfile");
 const adminLogin = require("./routes/adminProfile");
 const userPost = require("./routes/userPosts.js");
+const favouritePost = require("./routes/favouritePosts");
 
 const follow = require("./routes/follow");
 
 
-
+app.use("/uploads", express.static('uploads'))
 app.use(morgan("dev"));
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(bodyparser.json());
@@ -23,7 +22,12 @@ app.use(cors());
 
 app.use("/user", userProfile);
 app.use("/post", userPost);
+
 app.use("/user",follow);
+
+app.use("/favourites", favouritePost);
+
+
 
 //for handliing cors errors
 app.use((req, res, next) => {

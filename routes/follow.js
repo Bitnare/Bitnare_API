@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/verifytoken.js');
 const {followers} = require('../model/Follow');
 const {followings} = require('../model/Follow');
-const users = require('../model/User');
+
 router.get('/followers',auth,(req,res)=>{
     followers.find({user : req.user._id })
     .select('-user -_id')
@@ -11,10 +11,9 @@ router.get('/followers',auth,(req,res)=>{
         path:' follower ',
         select: 'username'
     }) 
-    .exec(function (err, user) {
+    .exec(function (err, data) {
         if (err) return handleError(err);
-        console.log('The Follower list is %s', JSON.stringify(user));
-        // prints "The author is Ian Fleming"
+        return res.status(200).json(data);
       });
     
     
@@ -24,17 +23,16 @@ router.get('/following',auth,(req,res)=>{
     followings.find({user : req.user._id })
     .select('-user -_id')
     .populate({
-        path:' following ',
+        path:'following',
         select: 'username'
     }) 
-    .exec(function (err, user) {
+    .exec(function (err, data) {
         if (err) return handleError(err);
-        console.log('The Following list is %s', JSON.stringify(user));
-        // prints "The author is Ian Fleming"
+        return res.status(200).json(data);
       });
-    
-    
 });
+
+
 
 router.post('/follow',auth,(req,res)=>{
     var followerData = {
@@ -52,12 +50,10 @@ router.post('/follow',auth,(req,res)=>{
     
     following.save().then(function() { 
        follower.save().then(function(){
-        return res.status(200).json({
-        'msg':  'Follwing increased and his followers increased'
-        });
+        return res.status(200).json({message:"Succesfully Followed"});
        }).catch(err => {
-         following.deleteOne();
-         follower.deleteOne();
+        //  following.deleteOne();
+        //  follower.deleteOne();
          res.status(500).send(
             err.errors
         );
@@ -67,6 +63,26 @@ router.post('/follow',auth,(req,res)=>{
             err.errors
         );
     })
+});
+
+router.post('/unfollow',auth,(req,res)=>{
+    followings.deleteOne({following:req.body.follow_id,
+    user:req.user._id}).then(()=>{
+        followers.deleteOne({
+            follower: req.user._id,user: req.body.follow_id}).then(()=>{
+                return res.status(200).json({message:"Unfollowed Succesfully"});
+            }).catch((err)=>{
+                res.status(500).send(
+                    err.errors
+                ); 
+            });
+    })
+    .catch((err)=>{
+        res.status(500).send(
+            err.errors
+        );
+    });
+
 });
 
 module.exports = router;

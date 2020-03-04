@@ -103,7 +103,8 @@ const userSchema = new Schema({
             type: String,
 
         }
-    }]
+    }],
+
 });
 
 //hashed password

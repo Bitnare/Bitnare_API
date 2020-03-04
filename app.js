@@ -11,6 +11,7 @@ const userProfile = require("./routes/userProfile");
 const adminLogin = require("./routes/adminProfile");
 const userPost = require("./routes/userPosts.js");
 
+const follow = require("./routes/follow");
 
 
 
@@ -22,7 +23,7 @@ app.use(cors());
 
 app.use("/user", userProfile);
 app.use("/post", userPost);
-
+app.use("/user",follow);
 
 //for handliing cors errors
 app.use((req, res, next) => {

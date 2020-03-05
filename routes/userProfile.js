@@ -29,7 +29,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 //add user
-router.post("/addUser", (req, res) => {
+router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
 
     var dob = new Date(req.body.dob);
 
@@ -64,7 +64,13 @@ router.post("/addUser", (req, res) => {
                         // "user_type"     : req.body.user_type,
                         "email": req.body.email,
                         "username": req.body.username,
+                        "postimage": req.files.map(file => {
+                            const imgPath = file.path;
+                            return imgPath;
+        
+                        }),
                         "password": hashedPassword
+                        
 
                     }
 

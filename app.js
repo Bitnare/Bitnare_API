@@ -11,7 +11,7 @@ const userPost = require("./routes/userPosts.js");
 const favouritePost = require("./routes/favouritePosts");
 
 const follow = require("./routes/follow");
-const followerPosts = require("./routes/follow");
+const followerPosts = require("./routes/followerPosts");
 
 
 app.use("/uploads", express.static('uploads'))
@@ -28,7 +28,7 @@ app.use("/user",follow);
 
 app.use("/favourites", favouritePost);
 
-
+app.use("/",followerPosts);
 
 //for handliing cors errors
 app.use((req, res, next) => {

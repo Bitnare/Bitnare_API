@@ -106,21 +106,4 @@ router.delete('/delete/:commentid', auth, async(req, res) => {
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 module.exports = router;

@@ -152,7 +152,7 @@ router.patch('/update/:postid', auth, upload.array('postimage', 10), async(req, 
                 }
             });
 
-            res.status(200).json({
+            res.status(200).json({  
                 updatepost: updatePost
 
             })

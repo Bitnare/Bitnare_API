@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const saltRounds = 10;
+const auth = require('../middleware/verifytoken.js');
+
 
 //for storing image destination and filename
 const storage = multer.diskStorage({
@@ -61,17 +63,14 @@ router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
                         "skills": req.body.skills,
                         "job_title": req.body.job_title,
                         "company_name": req.body.company_name,
-                        // "user_type"     : req.body.user_type,
                         "email": req.body.email,
                         "username": req.body.username,
-                        "postimage": req.files.map(file => {
+                        "profile_image": req.files.map(file => {
                             const imgPath = file.path;
                             return imgPath;
-        
                         }),
                         "password": hashedPassword
                         
-
                     }
 
                     var addUser = new user(data);
@@ -128,9 +127,10 @@ router.post('/login', async function(req, res) {
 });
 
 //get user all
-router.get('/getUsers', function(req, res) {
+router.get('/getUsers', auth, function(req, res) {
     user.find()
         .select("-__v")
+        .select("-tokens")
         .select("-password")
         .then(function(users) {
             res.send(users);
@@ -140,7 +140,7 @@ router.get('/getUsers', function(req, res) {
 });
 
 //get user by id
-router.get("/fetchUser/:id", function(req, res) {
+router.get("/fetchUser/:id", auth, function(req, res) {
     var UserId = req.params.id.toString();
     console.log(UserId);
 
@@ -149,6 +149,7 @@ router.get("/fetchUser/:id", function(req, res) {
         })
         .select("-__v")
         .select("-password")
+        .select("-tokens")
         .then(function(getuser) {
             if (getuser) {
                 var dob = getuser[0].dob;
@@ -162,20 +163,46 @@ router.get("/fetchUser/:id", function(req, res) {
 });
 
 //update user by id
-router.put('/updateUser/:id', function(req, res) {
+router.patch('/updateUser/:id', auth, upload.array('profile_picture',10),function(req, res) {
     UserId = req.params.id.toString();
-    user.findByIdAndUpdate(UserId, req.body, {
-        new: true
-    }).then(function(updateuser) {
-        res.send(updateuser);
-
-    }).catch(function(e) {
-        res.send(e);
+    var updateUser = user.findById(UserId);
+    var password = req.body.password;
+    bcrypt.genSalt(saltRounds, function(err,salt){
+        if (err){
+            throw err
+        }else{
+            bcrypt.hash(password,salt,function(err, hashedPassword){
+                if (err){
+                    throw err
+                }else{
+                    req.body.profile_image=req.files.map(file => {
+                        const imgPath = file.path;
+                        return imgPath; 
+                    });
+                    req.body.password = hashedPassword
+                    updateUser.update(req.body).then(function(updateuser) {
+                        res.send({message: "updated"});
+                
+                    }).catch(function(e) {
+                        res.send(e);
+                    });
+                }
+            })
+        }
     });
+    // req.body.profile_image=req.files.map(file => {
+    //                 const imgPath = file.path;
+    //                 return imgPath; 
+    //             });
+    // updateUser.update(req.body).then(function(updateuser) {
+    //     res.send({message: "updated"});
+
+    // }).catch(function(e) {
+    //     res.send(e);
+    // });
 });
 
-//delete user by id
-router.delete('/deleteUser/:id', function(req, res) {
+router.delete('/deleteUser/:id', auth, (req, res) => {
     user.findByIdAndDelete(req.params.id).then(function(user) {
         res.json({
             message: "User deleted"

@@ -11,9 +11,16 @@ const followingSchema = new Schema({
     following : {type:Schema.Types.ObjectId,ref:'User'}
 });
 
+const privateListSchema = new Schema({
+    user:{type:Schema.Types.ObjectId,ref:'User'},
+    follower:{type:Schema.Types.ObjectId,ref:'User'}
+});
+
 const followersExport = mongoose.model("Followers", followersSchema);
 const followingExport = mongoose.model("Following", followingSchema);
+const privateListExport = mongoose.model("PrivateList",privateListSchema);
 module.exports = {
     followers: followersExport,
-    followings: followingExport
+    followings: followingExport,
+    privateList: privateListExport
 }

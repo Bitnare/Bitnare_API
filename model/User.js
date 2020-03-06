@@ -98,6 +98,9 @@ const userSchema = new Schema({
             index: '2dsphere'
         }
     },
+    profile_image:{
+        type: [String]
+    },
     tokens: [{
         token: {
             type: String,

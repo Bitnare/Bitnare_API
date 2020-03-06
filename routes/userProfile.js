@@ -190,16 +190,6 @@ router.patch('/updateUser/:id', auth, upload.array('profile_picture',10),functio
             })
         }
     });
-    // req.body.profile_image=req.files.map(file => {
-    //                 const imgPath = file.path;
-    //                 return imgPath; 
-    //             });
-    // updateUser.update(req.body).then(function(updateuser) {
-    //     res.send({message: "updated"});
-
-    // }).catch(function(e) {
-    //     res.send(e);
-    // });
 });
 
 router.delete('/deleteUser/:id', auth, (req, res) => {
@@ -230,49 +220,5 @@ router.post('/searchUser', function(req, res) {
             res.send(e);
         })
 });
-
-// //search user by age and location
-// router.post('/searchUser', function (req,res){
-//     var min_age = req.body.min_age;
-//     var max_age = req.body.max_age;
-
-//     var current = new Date();
-//     // var min_age = new min_age();
-//     console.log(min_age + "-" + max_age);
-
-//     var min = current.getFullYear() - min_age;
-//     var max = current.getFullYear() - max_age;
-
-//     var min_range = new Date(min + "-" + current.getUTCMonth() + "-" + current.getUTCDay());
-//     var max_range = new Date(max + "-" + current.getUTCMonth() + "-" + current.getUTCDay());
-
-//     console.log(min_range);
-//     console.log(max_range);
-
-//     user.find({
-//          $or : [{
-//         "location" :    { $near :
-//             {
-//               $geometry : {
-//                  type : "Point" ,
-//                  coordinates : [req.body.longitude,req.body.latitude] },
-//               $maxDistance : 1000*10 // gets users within 10 km maximum distance
-//             }
-//          },
-
-//         'dob': {
-//             $gte: max_range,
-//             $lte: min_range
-//         }
-//     }]
-
-//     }).then(function (listing) {
-//         console.log(listing);
-//             res.send(listing);
-//         }).catch(function (e) {
-//             res.send(e)
-//     });
-
-// });
 
 module.exports = router;

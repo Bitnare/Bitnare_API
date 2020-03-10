@@ -6,7 +6,7 @@ const auth = require('../middleware/verifytoken.js');
 //for storing image destination and filename
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './uploads/');
+        cb(null, './videos/');
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + file.originalname);
@@ -23,19 +23,19 @@ const fileFilter = (req, file, cb) => {
         cb(null, false)
     }
 };
-const upload = multer({ storage: storage, fileFilter: fileFilter });
+const upload = multer({ storage: storage });
 
-//route to create posts 
-router.post('/add', auth, upload.array('postimage', 10), async(req, res) => {
+//route to create posts with videos
+router.post('/addvideo', auth, upload.array('postvideo', 10), async(req, res) => {
     const userid = req.user._id;
     const poststatus = req.body.poststatus;
     try {
         if (poststatus === 'private') {
             const postData = new postModel({
                 postdescription: req.body.postdescription,
-                postimage: req.files.map(file => {
-                    const imgPath = file.path;
-                    return imgPath;
+                postvideo: req.files.map(file => {
+                    const videoPath = file.path;
+                    return videoPath;
 
                 }),
                 userid: userid,
@@ -54,9 +54,9 @@ router.post('/add', auth, upload.array('postimage', 10), async(req, res) => {
         } else {
             const postData = new postModel({
                 postdescription: req.body.postdescription,
-                postimage: req.files.map(file => {
-                    const imgPath = file.path;
-                    return imgPath;
+                postvideo: req.files.map(file => {
+                    const videoPath = file.path;
+                    return videoPath;
 
                 }),
                 userid: userid,
@@ -82,7 +82,7 @@ router.post('/add', auth, upload.array('postimage', 10), async(req, res) => {
 //route to fetch all posts  
 router.get('/all', async(req, res, next) => {
     try {
-        const posts = await postModel.find().populate('userid', '-password').select('_id postdescription postdate postimage userid poststatus')
+        const posts = await postModel.find().populate('userid', '-password').select('_id postdescription postdate postvideo userid poststatus')
         res.status(200).json({
             posts: posts
         })
@@ -133,7 +133,7 @@ router.get('/:postid', async(req, res, next) => {
 
 
 //route to update post 
-router.patch('/update/:postid', auth, upload.array('postimage', 10), async(req, res) => {
+router.patch('/update/:postid', auth, upload.array('postvideo', 10), async(req, res) => {
     const userid = req.user._id;
     const postid = req.params.postid;
     const poststatus = req.body.poststatus;

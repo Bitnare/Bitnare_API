@@ -162,10 +162,25 @@ router.get("/fetchUser/:id", auth, function(req, res) {
         });
 });
 
-//update user by id
-router.patch('/updateUser/:id', auth, upload.array('profile_picture',10),function(req, res) {
+// update user by id
+router.patch('/updateUser/:id', auth, upload.array('profile_image',10),function(req, res) {
     UserId = req.params.id.toString();
     var updateUser = user.findById(UserId);
+  
+    if(req.body.password===undefined){
+        req.body.profile_image=req.files.map(file => {
+            const imgPath = file.path;
+            return imgPath; 
+        })
+        updateUser.update(req.body).then(function(updateuser) {
+            res.send({message: "Updated"});
+    
+        }).catch(function(e) {
+            res.send(e);
+            console.log(e)
+        });
+    }
+    else{
     var password = req.body.password;
     bcrypt.genSalt(saltRounds, function(err,salt){
         if (err){
@@ -178,18 +193,20 @@ router.patch('/updateUser/:id', auth, upload.array('profile_picture',10),functio
                     req.body.profile_image=req.files.map(file => {
                         const imgPath = file.path;
                         return imgPath; 
-                    });
+                    })
                     req.body.password = hashedPassword
                     updateUser.update(req.body).then(function(updateuser) {
-                        res.send({message: "updated"});
+                        res.send({message: "Updated"});
                 
                     }).catch(function(e) {
                         res.send(e);
+                        console.log(e)
                     });
                 }
             })
         }
     });
+}
 });
 
 router.delete('/deleteUser/:id', auth, (req, res) => {

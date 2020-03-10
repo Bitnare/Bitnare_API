@@ -51,7 +51,7 @@ router.get('/:postid', auth, async(req, res) => {
     const postid = req.params.postid;
     const userid = req.user._id;
     try {
-        const getComment = await commentModel.find({ postid: postid }).populate('userid', 'username email')
+        const getComment = await commentModel.find({ postid: postid }).populate('userid', 'username email profile_image')
         res.status(200).json({
             success: true,
             comment: getComment

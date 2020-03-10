@@ -79,61 +79,9 @@ router.post('/addvideo', auth, upload.array('postvideo', 10), async(req, res) =>
     }
 });
 
-//route to fetch all posts  
-router.get('/all', async(req, res, next) => {
-    try {
-        const posts = await postModel.find().populate('userid', '-password').select('_id postdescription postdate postvideo userid poststatus')
-        res.status(200).json({
-            posts: posts
-        })
-    } catch (error) {
-        res.status(500).json({
-            error: error
-        })
-    }
-});
-
-//route to fetch particular user posts
-router.get('/myposts', auth, async(req, res, next) => {
-    const id = req.user._id;
-    try {
-        const userposts = await postModel.find({ userid: id }).populate('userid', '-password');
-        res.status(200).json({
-            myposts: userposts
-        })
-    } catch (error) {
-        res.status(400).json({
-
-            error: error
-        })
-    }
-
-
-
-});
-
-//route to fetch particular any posts with id 
-
-router.get('/:postid', async(req, res, next) => {
-    const postid = req.params.postid;
-    try {
-        const fetchPosts = await postModel.findById({ _id: postid }).populate('userid', '-password');
-        res.status(200).json({
-            post: fetchPosts
-
-        })
-    } catch (error) {
-        res.status(500).json({
-            error: error
-        })
-    }
-})
-
-
-
 
 //route to update post 
-router.patch('/update/:postid', auth, upload.array('postvideo', 10), async(req, res) => {
+router.patch('/updatevideo/:postid', auth, upload.array('postvideo', 10), async(req, res) => {
     const userid = req.user._id;
     const postid = req.params.postid;
     const poststatus = req.body.poststatus;
@@ -142,9 +90,9 @@ router.patch('/update/:postid', auth, upload.array('postvideo', 10), async(req, 
             const updatePost = await postModel.updateOne({ _id: postid }, {
                 $set: {
                     postdescription: req.body.postdescription,
-                    postimage: req.files.map(file => {
-                        const imgPath = file.path;
-                        return imgPath;
+                    postvideo: req.files.map(file => {
+                        const videoPath = file.path;
+                        return videoPath;
 
                     }),
                     poststatus: true
@@ -159,9 +107,9 @@ router.patch('/update/:postid', auth, upload.array('postvideo', 10), async(req, 
             const updatePost = await postModel.updateOne({ _id: postid }, {
                 $set: {
                     postdescription: req.body.postdescription,
-                    postimage: req.files.map(file => {
-                        const imgPath = file.path;
-                        return imgPath;
+                    postvideo: req.files.map(file => {
+                        const videoPath = file.path;
+                        return videoPath;
 
                     }),
 
@@ -184,8 +132,8 @@ router.patch('/update/:postid', auth, upload.array('postvideo', 10), async(req, 
 
 
 
-//route to delete particular user posts
-router.delete('/delete/:postid', auth, async(req, res, next) => {
+//route to delete particular user posts with video
+router.delete('/deletevideo/:postid', auth, async(req, res, next) => {
     const postid = req.params.postid;
     const userid = req.user._id;
     try {

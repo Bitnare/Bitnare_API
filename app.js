@@ -8,6 +8,7 @@ const bodyparser = require('body-parser');
 const userProfile = require("./routes/userProfile");
 const adminLogin = require("./routes/adminProfile");
 const userPost = require("./routes/userPosts.js");
+const videoPost = require("./routes/videoPost.js");
 const favouritePost = require("./routes/favouritePosts");
 const postComment = require("./routes/postComment");
 const follow = require("./routes/follow");
@@ -24,6 +25,7 @@ app.use(cors());
 
 app.use("/user", userProfile);
 app.use("/post", userPost);
+app.use("/post", videoPost);
 
 app.use("/user", follow);
 app.use("/comment", postComment);

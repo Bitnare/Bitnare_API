@@ -76,7 +76,7 @@ router.patch('/update/:commentid', auth, async(req, res, next) => {
             }
 
 
-        })
+        }).where({ userid: userid });
 
         res.status(200).json({
             success: true,
@@ -91,8 +91,9 @@ router.patch('/update/:commentid', auth, async(req, res, next) => {
 
 //route to delete comment 
 router.delete('/delete/:commentid', auth, async(req, res) => {
+    const userid = req.user._id;
     try {
-        const deletecomment = await commentModel.remove({ _id: req.params.commentid });
+        const deletecomment = await commentModel.remove({ _id: req.params.commentid }).where({ userid: userid });
         res.status(200).json({
 
             success: true,

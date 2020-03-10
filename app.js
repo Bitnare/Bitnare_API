@@ -14,7 +14,7 @@ const postComment = require("./routes/postComment");
 const follow = require("./routes/follow");
 const newsFeed = require("./routes/newsFeed");
 const like = require("./routes/likepost");
-
+const sharedPosts = require("./routes/sharedPosts");
 
 
 
@@ -35,7 +35,7 @@ app.use("/posts", like);
 app.use("/favourites", favouritePost);
 
 app.use("/",newsFeed);
-
+app.use("/",sharedPosts);
 
 //for handliing cors errors
 app.use((req, res, next) => {

@@ -133,7 +133,7 @@ router.get('/:postid', async(req, res, next) => {
 
 
 //route to update post 
-router.patch('/update/:postid', auth, upload.array('postimage', 10), async(req, res, next) => {
+router.patch('/update/:postid', auth, upload.array('postimage', 10), async(req, res) => {
     const userid = req.user._id;
     const postid = req.params.postid;
     const poststatus = req.body.poststatus;
@@ -147,12 +147,11 @@ router.patch('/update/:postid', auth, upload.array('postimage', 10), async(req, 
                         return imgPath;
 
                     }),
-                    userid: userid,
                     poststatus: true
                 }
-            });
+            }).where({ userid: userid });
 
-            res.status(200).json({
+            res.status(200).json({  
                 updatepost: updatePost
 
             })
@@ -165,14 +164,14 @@ router.patch('/update/:postid', auth, upload.array('postimage', 10), async(req, 
                         return imgPath;
 
                     }),
-                    userid: userid,
+
                     poststatus: false
                 }
-            });
+            }).where({ userid: userid });
 
             res.status(200).json({
                 updatepost: updatePost
-            })
+            });
         }
     } catch (error) {
         res.status(500).json({
@@ -188,8 +187,9 @@ router.patch('/update/:postid', auth, upload.array('postimage', 10), async(req, 
 //route to delete particular user posts
 router.delete('/delete/:postid', auth, async(req, res, next) => {
     const postid = req.params.postid;
+    const userid = req.user._id;
     try {
-        const postDelete = await postModel.remove({ _id: postid });
+        const postDelete = await postModel.remove({ _id: postid }).where({ userid: userid });
         res.status(200).json({
             message: "Your post is successfully deleted",
 

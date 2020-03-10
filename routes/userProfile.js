@@ -109,7 +109,7 @@ router.post('/login', async function(req, res) {
 
             if (users) {
                 //create and assign token for users
-                const token = jwt.sign({ _id: users._id, username: users.username }, "Bitnare", { expiresIn: "1hr" });
+                const token = jwt.sign({ _id: users._id, username: users.username }, "Bitnare");
                 return res.status(200).json({
                     message: "Token created successfully",
                     token: token,

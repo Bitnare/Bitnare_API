@@ -17,6 +17,10 @@ const postSchema = new Schema({
         type: [String]
 
     },
+    postvideo: {
+        type: [String]
+
+    },
 
     userid: {
         type: Schema.Types.ObjectId,

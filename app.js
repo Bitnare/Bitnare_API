@@ -9,8 +9,10 @@ const userProfile = require("./routes/userProfile");
 const adminLogin = require("./routes/adminProfile");
 const userPost = require("./routes/userPosts.js");
 const favouritePost = require("./routes/favouritePosts");
-
+const postComment = require("./routes/postComment");
 const follow = require("./routes/follow");
+const like = require("./routes/likepost");
+
 
 
 app.use("/uploads", express.static('uploads'))
@@ -23,9 +25,11 @@ app.use(cors());
 app.use("/user", userProfile);
 app.use("/post", userPost);
 
-app.use("/user",follow);
-
+app.use("/user", follow);
+app.use("/comment", postComment);
+app.use("/posts", like);
 app.use("/favourites", favouritePost);
+
 
 
 

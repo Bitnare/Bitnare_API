@@ -15,7 +15,7 @@ const follow = require("./routes/follow");
 const newsFeed = require("./routes/newsFeed");
 const like = require("./routes/likepost");
 const sharedPosts = require("./routes/sharedPosts");
-
+const userSearch = require("./routes/userSearch");
 
 
 app.use("/uploads", express.static('uploads'))
@@ -36,7 +36,7 @@ app.use("/favourites", favouritePost);
 
 app.use("/",newsFeed);
 app.use("/",sharedPosts);
-
+app.use("/search",userSearch);
 //for handliing cors errors
 app.use((req, res, next) => {
 

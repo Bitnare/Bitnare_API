@@ -69,9 +69,7 @@ router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
                             const imgPath = file.path;
                             return imgPath;
                         }),
-                        "password": hashedPassword,
-                        "code": req.body.code,
-                        "amount": req.body.amount
+                        "password": hashedPassword
                         
                     }
 
@@ -111,7 +109,7 @@ router.post('/login', async function(req, res) {
 
             if (users) {
                 //create and assign token for users
-                const token = jwt.sign({ _id: users._id, username: users.username }, "Bitnare");
+                const token = jwt.sign({ _id: users._id, username: users.username }, "Bitnare", { expiresIn: "1hr" });
                 return res.status(200).json({
                     message: "Token created successfully",
                     token: token,
@@ -239,5 +237,49 @@ router.post('/searchUser', function(req, res) {
             res.send(e);
         })
 });
+
+// //search user by age and location
+// router.post('/searchUser', function (req,res){
+//     var min_age = req.body.min_age;
+//     var max_age = req.body.max_age;
+
+//     var current = new Date();
+//     // var min_age = new min_age();
+//     console.log(min_age + "-" + max_age);
+
+//     var min = current.getFullYear() - min_age;
+//     var max = current.getFullYear() - max_age;
+
+//     var min_range = new Date(min + "-" + current.getUTCMonth() + "-" + current.getUTCDay());
+//     var max_range = new Date(max + "-" + current.getUTCMonth() + "-" + current.getUTCDay());
+
+//     console.log(min_range);
+//     console.log(max_range);
+
+//     user.find({
+//          $or : [{
+//         "location" :    { $near :
+//             {
+//               $geometry : {
+//                  type : "Point" ,
+//                  coordinates : [req.body.longitude,req.body.latitude] },
+//               $maxDistance : 1000*10 // gets users within 10 km maximum distance
+//             }
+//          },
+
+//         'dob': {
+//             $gte: max_range,
+//             $lte: min_range
+//         }
+//     }]
+
+//     }).then(function (listing) {
+//         console.log(listing);
+//             res.send(listing);
+//         }).catch(function (e) {
+//             res.send(e)
+//     });
+
+// });
 
 module.exports = router;

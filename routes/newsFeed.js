@@ -4,7 +4,7 @@ const auth = require('../middleware/verifytoken.js');
 const {followers} = require('../model/Follow');
 const {privateList} = require('../model/Follow');
 const userPosts = require('../model/BitnarePosts');
-
+const {followings} = require('../model/Follow');
 router.get('/follower/posts',auth,async (req,res)=>{
     //get the list of followers
     let followerList = await followers.find({user : req.user._id })
@@ -25,6 +25,29 @@ router.get('/follower/posts',auth,async (req,res)=>{
 
     
     res.status(200).json(followerPosts);
+    
+});
+
+router.get('/following/posts',auth,async (req,res)=>{
+    //get the list of following
+    let followingList = await followings.find({user : req.user._id })
+    .select('-user -_id')
+    .populate({
+        path:' following ',
+        select: '_id'
+    })
+    .exec().then(async(followingList)=>{
+        return followingList;
+    })
+    
+    //return there public posts
+    let followingPosts = await Promise.all(followingList.map(async(following)=>{
+        const posts = await userPosts.find({userid:following.following._id,poststatus:false});
+        return posts;
+    })).catch((err)=>console.log(err));
+
+    
+    res.status(200).json(followingPosts);
     
 });
 

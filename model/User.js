@@ -107,7 +107,12 @@ const userSchema = new Schema({
 
         }
     }],
-
+    code:{
+       type: String 
+    },
+    amount:{
+        type:Number
+    }
 });
 
 //hashed password

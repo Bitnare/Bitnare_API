@@ -69,7 +69,9 @@ router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
                             const imgPath = file.path;
                             return imgPath;
                         }),
-                        "password": hashedPassword
+                        "password": hashedPassword,
+                        "code": req.body.code,
+                        "amount": req.body.amount
                         
                     }
 

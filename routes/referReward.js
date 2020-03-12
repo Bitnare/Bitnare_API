@@ -7,14 +7,6 @@ const auth = require ("../middleware/verifytoken");
 router.post('/addRefer', function(req,res){
     const userId = req.user._id;
     const code = req.user.code;
-    try{
-        if(req.body.code === ){
-
-        }else{
-
-        }
-    }catch{
-
-    }
+    
 });
 

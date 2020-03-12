@@ -87,16 +87,14 @@ const userSchema = new Schema({
         required: [true, 'Enter password'],
         minlength: [8, 'Enter valid password']
     },
-    location: {
+    location:{
         // GeoJSON Point
         type: {
-            type: String,
-            enum: ['Point']
-        },
-        coordinates: {
+          type: String,
+          enum: ['Point'],
+        },coordinates: {
             type: [Number],
-            index: '2dsphere'
-        }
+          }
     },
     profile_image:{
         type: [String]
@@ -110,6 +108,7 @@ const userSchema = new Schema({
 
 });
 
+userSchema.index({location: '2dsphere'});
 //hashed password
 userSchema.statics.checkCrediantialsDb = async(username, password, callback) => {
     const user = await User.findOne({

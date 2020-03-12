@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const bcrypt = require("bcrypt");
 const validator = require('validator');
 const uniqueValidator = require('mongoose-unique-validator');
-
+const geocoder = require("../utils/geocoder");
 
 const userSchema = new Schema({
 
@@ -137,6 +137,16 @@ userSchema.statics.checkCrediantialsDb = async(username, password, callback) => 
 //     next();
 // })
 
+//save longitude and latitude of  adress(requires city ,address and zipcode for increased accuracy
+// for example Chabahil, Kathmandu 44602)
+userSchema.pre('save',async function(next){
+    const loc = await geocoder.geocode(this.current_city);
+    this.location={
+        type:'Point',
+        coordinates: [loc[0].longitude,loc[0].latitude],
+    }
+    next();
+})
 
 
 userSchema.plugin(uniqueValidator);

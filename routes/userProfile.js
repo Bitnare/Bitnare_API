@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const multer = require('multer');
 const saltRounds = 10;
 const auth = require('../middleware/verifytoken.js');
-
+const uniqid = require('uniqid');
 
 //for storing image destination and filename
 const storage = multer.diskStorage({
@@ -34,9 +34,8 @@ const upload = multer({ storage: storage, fileFilter: fileFilter });
 router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
 
     var dob = new Date(req.body.dob);
-
     var password = req.body.password;
-
+    const code = uniqid.process();
     bcrypt.genSalt(saltRounds, function(err, salt) {
         if (err) {
             throw err
@@ -69,7 +68,9 @@ router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
                             const imgPath = file.path;
                             return imgPath;
                         }),
-                        "password": hashedPassword
+                        "password": hashedPassword,
+                        "code": code,
+                        "amount": 100 
                         
                     }
 
@@ -85,7 +86,6 @@ router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
                         );
                     })
                 }
-
             })
         }
     });

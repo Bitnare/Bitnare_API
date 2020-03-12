@@ -41,6 +41,26 @@ router.get('/:fullname',function(req,res){
     )
 })
 
+router.get('/:location',function(req,res){
+    user.find({  
+       "location" :    { $near :
+           {
+             $geometry : {
+                type : "Point" ,
+                coordinates : [req.body.longitude,req.body.latitude] },
+             $maxDistance : 1000*10 // gets users within 10 km maximum distance
+           }
+        },
+   }).then(function (listing) {
+       console.log(listing);
+
+       res.send(listing);
+
+
+   }).catch(function (e) {
+       res.send(e)
+   });
+});
 
 
 module.exports = router;

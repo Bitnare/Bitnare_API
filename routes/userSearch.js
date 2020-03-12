@@ -5,8 +5,8 @@ const auth = require('../middleware/verifytoken.js');
 
 
 router.get('/:fullname',function(req,res){
-
-    var terms = req.params.fullname.split(' ');
+    //send in pattern e.g Sachin-Khadka
+    var terms = req.params.fullname.split('-');
     var regexString = "";
 
     for (let i = 0; i < terms.length; i++)
@@ -22,7 +22,13 @@ router.get('/:fullname',function(req,res){
     var re = new RegExp(regexString, 'ig');
     
     user.aggregate([
-    {"$project":{"fullname":{"$concat":["$first_name"," " ,"$last_name"]}}},
+    {"$project":{"fullname":{"$concat":["$first_name",{ $cond: {
+        if: {
+          $eq: ['$middle_name', ""]
+        },
+        then: {$concat: [" "]},
+        else: {$concat: [" ","$middle_name"," "]}
+  }},"$last_name"]}}},
     {"$match":{"fullname":re}}
     ]).exec(function(err, results) { 
          if(err){

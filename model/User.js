@@ -98,7 +98,7 @@ const userSchema = new Schema({
             index: '2dsphere'
         }
     },
-    profile_image:{
+    profile_image: {
         type: [String]
     },
     tokens: [{
@@ -107,6 +107,9 @@ const userSchema = new Schema({
 
         }
     }],
+    code: {
+        type: String
+    }
 
 });
 

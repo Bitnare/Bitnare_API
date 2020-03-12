@@ -31,7 +31,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 //add user
-router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
+router.post("/addUser", upload.array('profile_image', 10), (req, res) => {
 
     var dob = new Date(req.body.dob);
 
@@ -70,7 +70,7 @@ router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
                             return imgPath;
                         }),
                         "password": hashedPassword
-                        
+
                     }
 
                     var addUser = new user(data);
@@ -125,7 +125,7 @@ router.post('/login', async function(req, res) {
         }
     }
 });
-
+z
 //get user all
 router.get('/getUsers', auth, function(req, res) {
     user.find()
@@ -163,50 +163,49 @@ router.get("/fetchUser/:id", auth, function(req, res) {
 });
 
 // update user by id
-router.patch('/updateUser/:id', auth, upload.array('profile_image',10),function(req, res) {
+router.patch('/updateUser/:id', auth, upload.array('profile_image', 10), function(req, res) {
     UserId = req.params.id.toString();
     var updateUser = user.findById(UserId);
-  
-    if(req.body.password===undefined){
-        req.body.profile_image=req.files.map(file => {
+
+    if (req.body.password === undefined) {
+        req.body.profile_image = req.files.map(file => {
             const imgPath = file.path;
-            return imgPath; 
+            return imgPath;
         })
         updateUser.update(req.body).then(function(updateuser) {
-            res.send({message: "Updated"});
-    
+            res.send({ message: "Updated" });
+
         }).catch(function(e) {
             res.send(e);
             console.log(e)
         });
+    } else {
+        var password = req.body.password;
+        bcrypt.genSalt(saltRounds, function(err, salt) {
+            if (err) {
+                throw err
+            } else {
+                bcrypt.hash(password, salt, function(err, hashedPassword) {
+                    if (err) {
+                        throw err
+                    } else {
+                        req.body.profile_image = req.files.map(file => {
+                            const imgPath = file.path;
+                            return imgPath;
+                        })
+                        req.body.password = hashedPassword
+                        updateUser.update(req.body).then(function(updateuser) {
+                            res.send({ message: "Updated" });
+
+                        }).catch(function(e) {
+                            res.send(e);
+                            console.log(e)
+                        });
+                    }
+                })
+            }
+        });
     }
-    else{
-    var password = req.body.password;
-    bcrypt.genSalt(saltRounds, function(err,salt){
-        if (err){
-            throw err
-        }else{
-            bcrypt.hash(password,salt,function(err, hashedPassword){
-                if (err){
-                    throw err
-                }else{
-                    req.body.profile_image=req.files.map(file => {
-                        const imgPath = file.path;
-                        return imgPath; 
-                    })
-                    req.body.password = hashedPassword
-                    updateUser.update(req.body).then(function(updateuser) {
-                        res.send({message: "Updated"});
-                
-                    }).catch(function(e) {
-                        res.send(e);
-                        console.log(e)
-                    });
-                }
-            })
-        }
-    });
-}
 });
 
 router.delete('/deleteUser/:id', auth, (req, res) => {

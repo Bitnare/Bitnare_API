@@ -104,9 +104,14 @@ const userSchema = new Schema({
     tokens: [{
         token: {
             type: String,
-
         }
     }],
+    code:{
+        type:String
+    },
+    amount:{
+        type:Number
+    }
 
 });
 

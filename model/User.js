@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const bcrypt = require("bcrypt");
 const validator = require('validator');
 const uniqueValidator = require('mongoose-unique-validator');
-
+const geocoder = require("../utils/geocoder");
 
 const userSchema = new Schema({
 
@@ -87,16 +87,14 @@ const userSchema = new Schema({
         required: [true, 'Enter password'],
         minlength: [8, 'Enter valid password']
     },
-    location: {
+    location:{
         // GeoJSON Point
         type: {
-            type: String,
-            enum: ['Point']
-        },
-        coordinates: {
+          type: String,
+          enum: ['Point'],
+        },coordinates: {
             type: [Number],
-            index: '2dsphere'
-        }
+          }
     },
     profile_image: {
         type: [String]
@@ -113,6 +111,7 @@ const userSchema = new Schema({
 
 });
 
+userSchema.index({location: '2dsphere'});
 //hashed password
 userSchema.statics.checkCrediantialsDb = async(username, password, callback) => {
     const user = await User.findOne({
@@ -140,6 +139,16 @@ userSchema.statics.checkCrediantialsDb = async(username, password, callback) => 
 //     next();
 // })
 
+//save longitude and latitude of  adress(requires city ,address and zipcode for increased accuracy
+// for example Chabahil, Kathmandu 44602)
+userSchema.pre('save',async function(next){
+    const loc = await geocoder.geocode(this.current_city);
+    this.location={
+        type:'Point',
+        coordinates: [loc[0].longitude,loc[0].latitude],
+    }
+    next();
+})
 
 
 userSchema.plugin(uniqueValidator);

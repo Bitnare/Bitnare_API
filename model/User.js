@@ -96,7 +96,7 @@ const userSchema = new Schema({
             type: [Number],
           }
     },
-    profile_image:{
+    profile_image: {
         type: [String]
     },
     tokens: [{
@@ -104,12 +104,10 @@ const userSchema = new Schema({
             type: String,
         }
     }],
-    code:{
-        type:String
-    },
-    amount:{
-        type:Number
+    code: {
+        type: String
     }
+
 
 });
 

@@ -6,6 +6,8 @@ const bcrypt = require('bcrypt');
 const multer = require('multer');
 const saltRounds = 10;
 const auth = require('../middleware/verifytoken.js');
+const reward = require('../model/Reward.js');
+const transaction = require('../model/transactions.js');
 const uniqid = require('uniqid');
 
 //for storing image destination and filename
@@ -31,60 +33,158 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 //add user
-router.post("/addUser", upload.array('profile_image', 10),(req, res) => {
+router.post("/addUser", upload.array('profile_image', 10), async(req, res) => {
 
     var dob = new Date(req.body.dob);
     var password = req.body.password;
     const code = uniqid.process();
-    bcrypt.genSalt(saltRounds, function(err, salt) {
+
+    bcrypt.genSalt(saltRounds, async function(err, salt) {
         if (err) {
             throw err
         } else {
-            bcrypt.hash(password, salt, function(err, hashedPassword) {
+            bcrypt.hash(password, salt, async function(err, hashedPassword) {
                 if (err) {
                     throw err
                 } else {
 
-                    data = {
+                    const refercode = req.body.code;
 
-                        "first_name": req.body.first_name,
-                        "middle_name": req.body.middle_name,
-                        "last_name": req.body.last_name,
-                        "dob": dob,
-                        "gender": req.body.gender,
-                        "hometown": req.body.hometown,
-                        "current_city": req.body.current_city,
-                        "height": req.body.height,
-                        "weight": req.body.weight,
-                        "drink": req.body.drink,
-                        "smoke": req.body.smoke,
-                        "education": req.body.education,
-                        "skills": req.body.skills,
-                        "job_title": req.body.job_title,
-                        "company_name": req.body.company_name,
-                        "email": req.body.email,
-                        "username": req.body.username,
-                        "profile_image": req.files.map(file => {
-                            const imgPath = file.path;
-                            return imgPath;
-                        }),
-                        "password": hashedPassword,
-                        "code": code,
-                        "amount": 100 
-                        
+                    if (!refercode) {
+                        //if user is registering account without  referal code
+                        data = {
+
+                            "first_name": req.body.first_name,
+                            "middle_name": req.body.middle_name,
+                            "last_name": req.body.last_name,
+                            "dob": dob,
+                            "gender": req.body.gender,
+                            "hometown": req.body.hometown,
+                            "current_city": req.body.current_city,
+                            "height": req.body.height,
+                            "weight": req.body.weight,
+                            "drink": req.body.drink,
+                            "smoke": req.body.smoke,
+                            "education": req.body.education,
+                            "skills": req.body.skills,
+                            "job_title": req.body.job_title,
+                            "company_name": req.body.company_name,
+                            "email": req.body.email,
+                            "username": req.body.username,
+                            "profile_image": req.files.map(file => {
+                                const imgPath = file.path;
+                                return imgPath;
+                            }),
+                            "password": hashedPassword,
+                            "code": code
+
+
+
+                        }
+
+                        var addUser = new user(data);
+                        addUser.save().then(function() {
+                            res.send({
+                                message: "Sucessful "
+                            });
+
+                        }).then(async function() {
+                            //if user is registered new transaction is credit 
+                            const dataTransaction = transaction({
+                                userid: addUser._id,
+                                credit: 100,
+                                transaction_type: "Normal Registration Point"
+                            })
+
+                            const addTransaction = await dataTransaction.save();
+                            res.status(200).json({
+                                status: true,
+                                data: addTransaction
+                            });
+                        }).catch(err => {
+                            res.status(500).send(
+                                err.errors
+                            );
+                        })
+                    } else {
+                        //to check refercode and original usercode
+                        checkcode = await user.findOne({ 'code': refercode, });
+                        if (checkcode) {
+                            data = {
+
+                                "first_name": req.body.first_name,
+                                "middle_name": req.body.middle_name,
+                                "last_name": req.body.last_name,
+                                "dob": dob,
+                                "gender": req.body.gender,
+                                "hometown": req.body.hometown,
+                                "current_city": req.body.current_city,
+                                "height": req.body.height,
+                                "weight": req.body.weight,
+                                "drink": req.body.drink,
+                                "smoke": req.body.smoke,
+                                "education": req.body.education,
+                                "skills": req.body.skills,
+                                "job_title": req.body.job_title,
+                                "company_name": req.body.company_name,
+                                "email": req.body.email,
+                                "username": req.body.username,
+                                "profile_image": req.files.map(file => {
+                                    const imgPath = file.path;
+                                    return imgPath;
+                                }),
+
+                                "password": hashedPassword,
+                                "code": code
+
+
+                            }
+                            var addUser = new user(data);
+                            addUser.save().then(async function() {
+                                    res.send({
+                                        message: "Sucessful "
+                                    });
+                                    const transactionData = new transaction({
+                                        userid: addUser._id,
+                                        credit: 150,
+                                        transaction_type: "Registration using referal code"
+                                    });
+                                    const transactions = await transactionData.save();
+                                    if (!transactions) throw error;
+                                }).then(async function() {
+                                    const referrerTransaction = new transaction({
+                                        userid: checkcode._id,
+                                        credit: 50,
+                                        transaction_type: "Earned by refering "
+
+                                    });
+                                    const referamount = await referrerTransaction.save();
+                                    if (!referamount) throw error;
+                                })
+                                .then(async function() {
+                                    const rewards = new reward({
+                                        referred_by: checkcode._id,
+                                        referred_to: addUser._id,
+                                        cash_earned: 50
+                                    });
+
+                                    const addReward = await rewards.save();
+                                    res.status(200).json({
+                                        "message": "Reward table created",
+                                        "rewards": addReward
+
+                                    })
+                                }).catch(err => {
+                                    res.status(500).send(
+                                        err.errors
+                                    );
+                                })
+                        } else {
+
+                            res.send("Referal code not found")
+
+                        }
                     }
-
-                    var addUser = new user(data);
-                    addUser.save().then(function() {
-                        res.send({
-                            message: "Sucessful "
-                        });
-
-                    }).catch(err => {
-                        res.status(500).send(
-                            err.errors
-                        );
-                    })
                 }
             })
         }
@@ -109,7 +209,7 @@ router.post('/login', async function(req, res) {
 
             if (users) {
                 //create and assign token for users
-                const token = jwt.sign({ _id: users._id, username: users.username }, "Bitnare", { expiresIn: "1hr" });
+                const token = jwt.sign({ _id: users._id, username: users.username }, "Bitnare");
                 return res.status(200).json({
                     message: "Token created successfully",
                     token: token,
@@ -163,50 +263,49 @@ router.get("/fetchUser/:id", auth, function(req, res) {
 });
 
 // update user by id
-router.patch('/updateUser/:id', auth, upload.array('profile_image',10),function(req, res) {
+router.patch('/updateUser/:id', auth, upload.array('profile_image', 10), function(req, res) {
     UserId = req.params.id.toString();
     var updateUser = user.findById(UserId);
-  
-    if(req.body.password===undefined){
-        req.body.profile_image=req.files.map(file => {
+
+    if (req.body.password === undefined) {
+        req.body.profile_image = req.files.map(file => {
             const imgPath = file.path;
-            return imgPath; 
+            return imgPath;
         })
         updateUser.update(req.body).then(function(updateuser) {
-            res.send({message: "Updated"});
-    
+            res.send({ message: "Updated" });
+
         }).catch(function(e) {
             res.send(e);
             console.log(e)
         });
+    } else {
+        var password = req.body.password;
+        bcrypt.genSalt(saltRounds, function(err, salt) {
+            if (err) {
+                throw err
+            } else {
+                bcrypt.hash(password, salt, function(err, hashedPassword) {
+                    if (err) {
+                        throw err
+                    } else {
+                        req.body.profile_image = req.files.map(file => {
+                            const imgPath = file.path;
+                            return imgPath;
+                        })
+                        req.body.password = hashedPassword
+                        updateUser.update(req.body).then(function(updateuser) {
+                            res.send({ message: "Updated" });
+
+                        }).catch(function(e) {
+                            res.send(e);
+                            console.log(e)
+                        });
+                    }
+                })
+            }
+        });
     }
-    else{
-    var password = req.body.password;
-    bcrypt.genSalt(saltRounds, function(err,salt){
-        if (err){
-            throw err
-        }else{
-            bcrypt.hash(password,salt,function(err, hashedPassword){
-                if (err){
-                    throw err
-                }else{
-                    req.body.profile_image=req.files.map(file => {
-                        const imgPath = file.path;
-                        return imgPath; 
-                    })
-                    req.body.password = hashedPassword
-                    updateUser.update(req.body).then(function(updateuser) {
-                        res.send({message: "Updated"});
-                
-                    }).catch(function(e) {
-                        res.send(e);
-                        console.log(e)
-                    });
-                }
-            })
-        }
-    });
-}
 });
 
 router.delete('/deleteUser/:id', auth, (req, res) => {

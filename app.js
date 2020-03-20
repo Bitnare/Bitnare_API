@@ -12,9 +12,12 @@ const videoPost = require("./routes/videoPost.js");
 const favouritePost = require("./routes/favouritePosts");
 const postComment = require("./routes/postComment");
 const follow = require("./routes/follow");
+const rewardUser = require("./routes/rewards");
 const newsFeed = require("./routes/newsFeed");
 const like = require("./routes/likepost");
 const sharedPosts = require("./routes/sharedPosts");
+const transaction = require("./routes/transaction");
+
 
 
 
@@ -28,14 +31,16 @@ app.use(cors());
 app.use("/user", userProfile);
 app.use("/post", userPost);
 app.use("/post", videoPost);
+app.use("/reward", rewardUser);
 
 app.use("/user", follow);
 app.use("/comment", postComment);
 app.use("/posts", like);
 app.use("/favourites", favouritePost);
+app.use("/", transaction);
 
-app.use("/",newsFeed);
-app.use("/",sharedPosts);
+app.use("/", newsFeed);
+app.use("/", sharedPosts);
 
 //for handliing cors errors
 app.use((req, res, next) => {

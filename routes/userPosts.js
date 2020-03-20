@@ -13,6 +13,7 @@ const storage = multer.diskStorage({
     }
 });
 
+
 //filefilter for only selected type of image is inserted to database
 const fileFilter = (req, file, cb) => {
     if (file.mimetype === 'image/png' ||
